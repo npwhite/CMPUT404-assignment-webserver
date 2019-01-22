@@ -92,47 +92,36 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         print(request_line)
         method, uri, http_version = request_line.split()
-        #filename = self.route(uri)
 
         requested_path = ROOT + uri
         print("requested_path = {}".format(requested_path))
-        #exists = os.path.isfile(requested_path)
-        #https://stackoverflow.com/questions/3812849/how-to-check-whether-a-directory-is-a-sub-directory-of-another-directory
-        # user: simon
-        #auth = self.in_directory(requested_path, ROOT)
         """ Authenticate path permission """
         file = self.check_file_access(requested_path)
+        print("FILE DIC = {}".format(file))
+
         if file["EXISTS"] and file["AUTH"]:
             with open(requested_path, 'r') as file_obj:
                 self.handle_200_response(file_obj)
 
-
-        #except IOError as error:
+        elif file["EXISTS"] and not file["AUTH"]:
+            """ could do 403 forbidden but tests expect 404 """
+            self.handle_404_response()
 
         elif not file["EXISTS"]:
 
-            redirect = self.route(uri)                                       # WARNING: test this well
+            redirect = self.reroute(uri)                                       # WARNING: test this well
             routed_file_perm = self.check_file_access(ROOT + redirect)
+            print("---------- REDIRECT = {} -----------".format(redirect))
+
             if routed_file_perm["EXISTS"] and routed_file_perm["AUTH"]:
                 print("301 ISSUED----------------------")
                 self.handle_301_response(redirect)
 
-            # elif routed_file_perm["EXISTS"] and not routed_file_perm["AUTH"]:     # TODO:
-            #     """ FORBIDDEN """
+            elif routed_file_perm["EXISTS"] and not routed_file_perm["AUTH"]:
+                self.handle_404_response()
 
             elif not routed_file_perm["EXISTS"]:
                 self.handle_404_response()
-
-
-
-            # """ if file in redirect dic, 301 Moved """
-            # if file_route is not None:
-            #     print("301 ISSUED----------------------")
-            #     self.handle_301_response(file_route)
-            #
-            # else:
-            #     """ else: 404 error not found """
-            #     self.handle_404_response(file_route)
 
 
     def handle_200_response(self, file):
@@ -156,15 +145,13 @@ class MyWebServer(socketserver.BaseRequestHandler):
         res_obj = Response(status, "ITEM WAS MOVED PERMANENTLY\n")
         """ type should be 301 respones body type, not type of the file requested """
         res_obj.header_dic["Content-Type"] = "text/plain"
-        """ generalize this """
-        res_obj.header_dic["Location"] = "http://{}:{}{}".format(HOST, str(PORT), file_route)            # <--
+        res_obj.header_dic["Location"] = "http://{}:{}{}".format(HOST, str(PORT), file_route)
         response_string = res_obj.response_string()
 
         self.request.sendall(bytearray(response_string, 'utf-8'))
         print()
         print("DATA SENT")
         print(response_string)
-
 
 
     def handle_404_response(self):
@@ -180,7 +167,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print(response_string)
 
 
-
     def check_file_access(self, requested_path):
         valid_file = {
         "EXISTS":os.path.isfile(requested_path),
@@ -189,40 +175,30 @@ class MyWebServer(socketserver.BaseRequestHandler):
         return valid_file
 
 
-
-
-
-    #https://stackoverflow.com/questions/3812849/how-to-check-whether-a-directory-is-a-sub-directory-of-another-directory
+    # ----- CITATION:-----
+    # LINK: https://stackoverflow.com/questions/3812849/how-to-check-whether-a-directory-is-a-sub-directory-of-another-directory
+    # USERS: simon, blaze
     def in_directory(self, file, directory):
-        #make both absolute
+        """
+        Given a file and directory path, determines if the file belongs to the directory
+        Arguments:
+            file : str
+                - the file we are checking
+            directory : str
+                - the directory we are checking
+        Return:
+            bool - True if the file is contained in the directory
+        """
         directory = os.path.join(os.path.realpath(directory), '')
         file = os.path.realpath(file)
-        #return true, if the common prefix of both is equal to directory
-        #e.g. /a/b/c/d.rst and directory is /a/b, the common prefix is /a/b
         return os.path.commonprefix([file, directory]) == directory
 
 
-    def route(self, uri):
 
-        # routes = {
-        # "/":"index.html",
-        # #"/deep/index.html":"deep/index.html",
-        # #"/base.css":"base.css",
-        # #"/deep/deep.css":"deep/deep.css"
-        # }
-        #
-        # # if uri not in routes.keys():
-        # #     return "www/404.html"
-        # # else:
-        # #     return routes[uri]
-        #
-        # if uri not in routes.keys():
-        #     return None
-        # else:
-        #     return routes[uri]
-
-        # if last char == /, then directory was entered, append index.html
-        # else if no extension, directory also listed, append /index.html
+    def reroute(self, uri):
+        """
+        Edits the passed uri to more-likely represent a findable file
+        """
 
         if uri[-1] == '/':
             """ directory suspected, default index.html """
@@ -232,7 +208,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
             uri += "/index.html"
 
         return uri
-
 
 
 

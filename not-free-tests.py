@@ -26,23 +26,23 @@ class TestYourWebserver(unittest.TestCase):
         """do nothing"""
         self.baseurl = baseurl
 
-    def test_get_root(self):
+    def test010_test_get_root(self):
         url = self.baseurl + "/"
         req = request.urlopen(url, None, 3)
         self.assertTrue( req.getcode()  == 200 , "200 OK Not FOUND!")
 
-    def test_get_deep(self):
+    def test011_test_get_deep(self):
         url = self.baseurl + "/deep/"
         req = request.urlopen(url, None, 3)
         self.assertTrue( req.getcode()  == 200 , "200 OK Not FOUND!")
 
 
-    def test_get_index(self):
+    def test012_test_get_index(self):
         url = self.baseurl + "/index.html"
         req = request.urlopen(url, None, 3)
         self.assertTrue( req.getcode()  == 200 , "200 OK Not FOUND!")
 
-    def test_get_404(self):
+    def test013_test_get_404(self):
         url = self.baseurl + "/do-not-implement-this-page-it-is-not-found"
         try:
             req = request.urlopen(url, None, 3)
@@ -52,7 +52,7 @@ class TestYourWebserver(unittest.TestCase):
         else:
             self.assertTrue( False, "Another Error was thrown!")
 
-    def test_get_group(self):
+    def test014_test_get_group(self):
         """ how secure are you? """
         url = self.baseurl + "/../../../../../../../../../../../../etc/group"
         try:
@@ -63,19 +63,19 @@ class TestYourWebserver(unittest.TestCase):
         else:
             self.assertTrue( false, "Another Error was thrown!")
 
-    def test_css(self):
+    def test015_test_css(self):
         url = self.baseurl + "/base.css"
         req = request.urlopen(url, None, 3)
         self.assertTrue( req.getcode()  == 200 , "200 OK Not FOUND!")
         self.assertTrue( req.info().get_content_type() == "text/css", ("Bad mimetype for css! %s" % req.info().get_content_type()))
 
-    def test_html(self):
+    def test016_test_html(self):
         url = self.baseurl + "/index.html"
         req = request.urlopen(url, None, 3)
         self.assertTrue( req.getcode()  == 200 , "200 OK Not FOUND!")
         self.assertTrue( req.info().get_content_type() == "text/html", ("Bad mimetype for html! %s" % req.info().get_content_type()))
 
-    def test_hardcode(self):
+    def test017_test_hardcode(self):
         os.system("cp -r www/deep www/hardcode")
         url = self.baseurl + "/hardcode/index.html"
         req = request.urlopen(url, None, 3)
@@ -86,7 +86,7 @@ class TestYourWebserver(unittest.TestCase):
         self.assertTrue( req.getcode()  == 200 , "200 OK Not FOUND! Hardcoding? /hardcode/")
         self.assertTrue( req.info().get_content_type() == "text/html", ("Bad mimetype for html! %s" % req.info().get_content_type()))
 
-    def test_hardcode2(self):
+    def test018_test_hardcode2(self):
         url = self.baseurl + "/deep.css"
         try:
             req = request.urlopen(url, None, 3)
