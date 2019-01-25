@@ -49,6 +49,7 @@ ROOT = "www"
 HOST = "localhost"
 PORT = 8080
 SERVER = "Nicks_Macbook_Pro"
+SUPPORTED_METHODS = ["GET"]
 DEBUG = True
 
 class Response():
@@ -93,22 +94,32 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        # print("--------- RECIEVED ---------")
-        # print(self.data.decode('utf-8'))
-        # print()
+        if DEBUG:
+            print("--------- RECIEVED ---------")
+            print(self.data.decode('utf-8'))
+            print()
+
         request_dic = {}
         request_list = self.data.decode('utf-8').split("\r\n")
         request_line = request_list[0]
 
-        if DEBUG:
-            print("---- NEW REQUEST ----")
-            print(request_line)
+        # if DEBUG:
+        #     print("---- NEW REQUEST ----")
+        #     print(request_line)
+
+        if len(request_line.split()) != 3:
+            return
 
         for i in range(1, len(request_list), 1):
-            key, value = request_list[i].split(":", 1)
-            request_dic[key] = value
+            if ":" in request_list[i]:
+                key, value = request_list[i].split(":", 1)
+                request_dic[key] = value
 
         method, uri, http_version = request_line.split()
+        if method not in SUPPORTED_METHODS:
+            self.handle_405_response()
+            return
+
         requested_path = ROOT + uri
         file = self.check_file_access(requested_path)
 
@@ -184,6 +195,15 @@ class MyWebServer(socketserver.BaseRequestHandler):
         if DEBUG:
             print("-------- HEADER SENT --------")
             print(res_obj.header_to_string())
+
+    def handle_405_response(self):
+        status = "HTTP/1.1 405 Method Not Allowed"
+
+        res_obj = Response(status, "ERROR 405 METHOD NOT ALLOWED\n")
+        res_obj.header_dic["Content-Type"] = "text/plain"
+        response_string = res_obj.response_string()
+
+        self.request.sendall(bytearray(response_string, 'utf-8'))
 
 
     def check_file_access(self, requested_path):
