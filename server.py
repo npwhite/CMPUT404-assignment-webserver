@@ -40,7 +40,7 @@ HOST = "localhost"
 PORT = 8080
 SERVER = "Nicks_Macbook_Pro"
 SUPPORTED_METHODS = ["GET"]
-DEBUG = True
+DEBUG = False
 
 class Response():
 
