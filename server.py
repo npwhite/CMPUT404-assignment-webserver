@@ -5,23 +5,13 @@ from datetime import datetime
 from time import mktime
 import os
 
-# TODO: Refer to github for more details
-#   - Return a status code of “405 Method Not Allowed” for any method you
-#   cannot handle (POST/PUT/DELETE)
-#   - Provide a screenshot
-#   - I can check out the source code via an HTTP git URL
+# TODO:
 #   - License your webserver properly (use an OSI approved license)
 #       - Put your name on it!
 
-# REVIEW:
-#   - The webserver works with Firefox and Chromium
-#   - The webserver can be run using the runner.sh file
-#   - Must run in the undergrad lab (Ubuntu 12.04)
 
 
-
-
-# Copyright 2013 Abram Hindle, Eddie Antonio Santos
+# Copyright 2019 Nicholas Whitefield, Abram Hindle, Eddie Antonio Santos
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +32,7 @@ import os
 #
 # http://docs.python.org/2/library/socketserver.html
 #
-# run: python freetests.py
+# run: python3 freetests.py
 
 
 ROOT = "www"
